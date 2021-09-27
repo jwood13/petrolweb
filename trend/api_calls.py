@@ -25,7 +25,10 @@ def get_access_token():
     auth_response = requests.request("GET", url, headers=headers, params=querystring)
     access_token = auth_response.json()['access_token']
     return access_token
-access_token = get_access_token()
+try:
+    access_token = get_access_token()
+except KeyError:
+    access_token = ''
 
 def get_local_prices(postcode,fueltype):
     '''

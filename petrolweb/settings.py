@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-6*(vc4d@30-g670r%hb_ch&hph*^48()m1i^@mm2+b1!+=ik9s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['jwpetrol.herokuapp.com']
+ALLOWED_HOSTS = ['jwpetrol.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'trend',
 ]
 
 MIDDLEWARE = [
@@ -114,7 +115,7 @@ USE_L10N = True
 USE_TZ = True
 
 # https://devcenter.heroku.com/articles/django-assets
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/

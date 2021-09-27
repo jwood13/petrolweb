@@ -9,4 +9,5 @@ from . import api_calls
 def index(request):
     station_data = api_calls.get_local_prices('2232','E10')
     current_lowest_price = station_data['prices'][0]['price']
-    return HttpResponse(f"The lowest price for E10 is {current_lowest_price}")
+    return render(request, 'current.html',{ 'text': f"The lowest price for E10 is {current_lowest_price}"})
+    
