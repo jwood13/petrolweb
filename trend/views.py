@@ -1,13 +1,13 @@
-import requests
-import os
 from django.shortcuts import render
-from django.http import HttpResponse
-from requests import api
+# from django.http import HttpResponse
+# from requests import api
 from . import api_calls
+
 
 # Create your views here.
 def index(request):
-    station_data = api_calls.get_local_prices('2232','E10')
+    station_data = api_calls.get_local_prices('2232', 'E10')
     current_lowest_price = station_data['prices'][0]['price']
-    return render(request, 'current.html',{ 'text': f"The lowest price for E10 is {current_lowest_price}"})
-    
+    station_code = station_data['prices'][0]['stationcode']
+    station_dict = {x['code']: x for x in station_data['stations']}
+    return render(request, 'current.html', {'text': f"The lowest price for E10 is {current_lowest_price} at {station_dict[station_code]['name']}"})
