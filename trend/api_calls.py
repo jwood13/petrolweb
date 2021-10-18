@@ -4,6 +4,7 @@ import uuid
 import json
 import time
 
+
 def get_access_token():
     '''
     Get the api access token from the security call
@@ -14,7 +15,7 @@ def get_access_token():
     '''
     url = "https://api.onegov.nsw.gov.au/oauth/client_credential/accesstoken"
 
-    querystring = {"grant_type":"client_credentials"}
+    querystring = {"grant_type": "client_credentials"}
 
     secret = os.environ['api_secret_b64']
     headers = {
@@ -25,12 +26,15 @@ def get_access_token():
     auth_response = requests.request("GET", url, headers=headers, params=querystring)
     access_token = auth_response.json()['access_token']
     return access_token
+
+
 try:
     access_token = get_access_token()
 except KeyError:
     access_token = ''
 
-def get_local_prices(postcode,fueltype):
+
+def get_local_prices(postcode, fueltype):
     '''
     Get prices of nearby stations based on a postcode and a fueltype
 
@@ -45,17 +49,17 @@ def get_local_prices(postcode,fueltype):
     ts = time.gmtime()
     timestamp = time.strftime("%d/%m/%Y %I:%m:%S %p", ts)
     payload = {
-    "fueltype": fueltype,
-    "brand": [],
-    "namedlocation": postcode,
-    "referencepoint": {
-        "latitude": "-34.045601",
-        "longitude": "151.051056"
-    },
-    "sortby": "Price",
-    "sortascending": "true"
+        "fueltype": fueltype,
+        "brand": [],
+        "namedlocation": postcode,
+        "referencepoint": {
+            "latitude": "-34.045601",
+            "longitude": "151.051056"
+        },
+        "sortby": "Price",
+        "sortascending": "true"
     }
-    payload_text=json.dumps(payload)
+    payload_text = json.dumps(payload)
     headers = {
         'content-type': 'application/json; charset=utf-8',
         'authorization': 'Bearer '+access_token,
@@ -67,4 +71,3 @@ def get_local_prices(postcode,fueltype):
     response = requests.request("POST", url, data=payload_text, headers=headers)
     station_data = response.json()
     return station_data
-
