@@ -66,4 +66,4 @@ class Fuel_Price(models.Model):
     price = models.FloatField()
 
     def __str__(self):
-        return f"{self.station}-{self.fuel}: ${self.price:%2f}"
+        return f"{self.station}-{self.fuel}: ${self.price:.2f}"
