@@ -71,6 +71,8 @@ def get_local_prices(postcode, fueltype):
         }
 
     response = requests.request("POST", url, data=payload_text, headers=headers)
+    if not response.ok:
+        raise Exception(station_data)
     station_data = response.json()
     return station_data
 
@@ -91,7 +93,7 @@ def pull_ref_data():
     url = "https://api.onegov.nsw.gov.au/FuelCheckRefData/v2/fuel/lovs"
     transaction_id = uuid.uuid4()
     ts = time.gmtime()
-    timestamp = time.strftime("%d/%m/%Y %I:%m:%S %p", ts)
+    timestamp = time.strftime("%d/%m/%Y %I:%M:%S %p", ts)
 
     querystring = {"states": "NSW"}
 
@@ -106,6 +108,8 @@ def pull_ref_data():
 
     ref_data_response = requests.request(
         "GET", url, headers=headers, data=querystring)
+    if not ref_data_response.ok:
+        raise Exception(ref_data_response.json())
     # Save data so it doesn't need to be called again
     return ref_data_response.json()
 
