@@ -3,8 +3,9 @@ import os
 import uuid
 import json
 import time
+import datetime
 
-from .models import Station
+from .models import Fuel_Price, Station
 
 
 def get_access_token():
@@ -77,6 +78,40 @@ def get_local_prices(postcode, fueltype):
     return station_data
 
 
+def get_all_prices(full=False):
+    '''
+    Get prices of nearby stations based on a postcode and a fueltype
+
+    Return
+    -------------
+    station data: {'stations': [{'brand', 'code', 'name', 'location':{'distance','latitude','longitude'}, 'state'}],
+                   'prices': [{'stationcode', 'fueltype', 'lastupdated', 'state'}]
+                   }
+    '''
+    if full:
+        url = "https://api.onegov.nsw.gov.au/FuelPriceCheck/v2/fuel/prices/"
+    else:
+        url = "https://api.onegov.nsw.gov.au/FuelPriceCheck/v2/fuel/prices/new"
+    transaction_id = uuid.uuid4()
+    ts = time.gmtime()
+    timestamp = time.strftime("%d/%m/%Y %I:%m:%S %p", ts)
+
+    headers = {
+        'authorization': 'Bearer ' + access_token,
+        'content-type': 'application/json; charset=utf-8',
+        'apikey': os.environ['api_key'],
+        'transactionid': str(transaction_id),
+        'requesttimestamp': timestamp,
+        'states': 'NSW'
+        }
+
+    response = requests.request("GET", url, headers=headers)
+    station_data = response.json()
+    if not response.ok:
+        raise Exception(station_data)
+    return station_data
+
+
 def pull_ref_data():
     '''
     Get the reference data from the nsw api
@@ -118,3 +153,16 @@ def save_station_data(station_data):
     for s in station_data:
         station = Station(name=s['name'], brand=s['brand'], id=s['code'], address=s['address'], latitude=s['location']['latitude'], longitude=s['location']['longitude'], state=s['state'])
         station.save()
+
+
+def pull_prices(full=False):
+    price_data = get_all_prices(full=False)#get_local_prices('2232', 'E10')
+    save_prices(price_data['prices'])
+
+
+def save_prices(price_data):
+    for p in price_data:
+        # station = Station.objects.get(id=p['stationcode'])
+        updated = datetime.datetime.strptime(p['lastupdated'], "%d/%m/%Y %H:%M:%S")
+        price = Fuel_Price(station_id=p['stationcode'], fuel=p['fueltype'], time=updated, price=p['price'])
+        price.save()
