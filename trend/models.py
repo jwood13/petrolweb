@@ -47,7 +47,7 @@ BRANDS_CHOICES = [('7-Eleven', '7-Eleven'),
 
 # Create your models here.
 class Station(models.Model):
-    station_name = models.CharField(max_length=10)
+    name = models.CharField(max_length=10)
     brand = models.CharField(max_length=30, choices=BRANDS_CHOICES)
     address = models.CharField(max_length=200)
     postcode = models.SmallIntegerField(null=True)
@@ -56,7 +56,7 @@ class Station(models.Model):
     state = models.CharField(max_length=3, choices=STATE_CHOICES)
 
     def __str__(self):
-        return self.station_name
+        return f"{self.id} - {self.name}"
 
 
 class Fuel_Price(models.Model):

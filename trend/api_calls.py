@@ -4,6 +4,8 @@ import uuid
 import json
 import time
 
+from .models import Station
+
 
 def get_access_token():
     '''
@@ -40,9 +42,9 @@ def get_local_prices(postcode, fueltype):
 
     Return
     -------------
-    station data: dict of relevant data
-                'stations'contains station data
-                'prices' contains relevant price data
+    station data: {'stations': [{'brand', 'code', 'name', 'location':{'distance','latitude','longitude'}, 'state'}],
+                   'prices': [{'stationcode', 'fueltype', 'lastupdated', 'state'}]
+                   }
     '''
     url = "https://api.onegov.nsw.gov.au/FuelPriceCheck/v2/fuel/prices/location"
     transaction_id = uuid.uuid4()
@@ -62,7 +64,7 @@ def get_local_prices(postcode, fueltype):
     payload_text = json.dumps(payload)
     headers = {
         'content-type': 'application/json; charset=utf-8',
-        'authorization': 'Bearer '+access_token,
+        'authorization': 'Bearer ' + access_token,
         'apikey': os.environ['api_key'],
         'transactionid': str(transaction_id),
         'requesttimestamp': timestamp
@@ -71,3 +73,44 @@ def get_local_prices(postcode, fueltype):
     response = requests.request("POST", url, data=payload_text, headers=headers)
     station_data = response.json()
     return station_data
+
+
+def pull_ref_data():
+    '''
+    Get the reference data from the nsw api
+
+    Return
+    ----------
+    ref_data_response: {'brands': {'items': {'name', 'state}},
+                        'fueltypes': {'items': {'code', 'name', 'state}},
+                        'stations': {'items': {'brand', 'code', 'name', 'address', 'location':{'latitude', longitude'}, 'state'}},
+                        'trend_periods': {'items': {}},
+                        'sortfields': {'items': {}},
+                        }
+    '''
+    url = "https://api.onegov.nsw.gov.au/FuelCheckRefData/v2/fuel/lovs"
+    transaction_id = uuid.uuid4()
+    ts = time.gmtime()
+    timestamp = time.strftime("%d/%m/%Y %I:%m:%S %p", ts)
+
+    querystring = {"states": "NSW"}
+
+    headers = {
+        'content-type': 'application/json; charset=utf-8',
+        'authorization': 'Bearer ' + access_token,
+        'apikey': os.environ['api_key'],
+        'transactionid': str(transaction_id),
+        'requesttimestamp': timestamp,
+        'if-modified-since': "01/01/2010 01:00:00 AM"
+    }
+
+    ref_data_response = requests.request(
+        "GET", url, headers=headers, data=querystring)
+    # Save data so it doesn't need to be called again
+    return ref_data_response.json()
+
+
+def save_station_data(station_data):
+    for s in station_data:
+        station = Station(name=s['name'], brand=s['brand'], id=s['code'], address=s['address'], latitude=s['location']['latitude'], longitude=s['location']['longitude'], state=s['state'])
+        station.save()
