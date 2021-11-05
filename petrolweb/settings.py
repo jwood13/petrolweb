@@ -27,10 +27,11 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+LOCAL = False
 
 ALLOWED_HOSTS = ['jwpetrol.herokuapp.com']
 
-if DEBUG:
+if LOCAL:
     ALLOWED_HOSTS.append('127.0.0.1')
 
 
@@ -81,7 +82,7 @@ WSGI_APPLICATION = 'petrolweb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-if DEBUG:
+if LOCAL:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
