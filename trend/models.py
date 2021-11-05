@@ -47,7 +47,7 @@ BRANDS_CHOICES = [('7-Eleven', '7-Eleven'),
 
 # Create your models here.
 class Station(models.Model):
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=100)
     brand = models.CharField(max_length=30, choices=BRANDS_CHOICES)
     address = models.CharField(max_length=200)
     postcode = models.SmallIntegerField(null=True)
