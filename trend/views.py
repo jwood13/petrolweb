@@ -20,9 +20,13 @@ def get_all_data(request):
     station_code = '1112'
     fuel_code = 'E10'
     petrol_prices = Fuel_Price.objects.filter(station=station_code, fuel=fuel_code)
-    petrol_price = petrol_prices[len(petrol_prices)-1].price
+    if len(petrol_prices) > 0:
+        petrol_price = petrol_prices[len(petrol_prices)-1].price
+        fuel_name = petrol_prices[len(petrol_prices)-1].fuel
+    else:
+        petrol_price = 0
+        fuel_name = 'N/A'
     station_name = Station.objects.get(id=station_code).name
-    fuel_name = petrol_prices[len(petrol_prices)-1].fuel
     return render(request, 'current.html', {'text': f"The petrol price at {station_name} is ${petrol_price} for {fuel_name}"})
 
 
