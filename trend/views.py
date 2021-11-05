@@ -32,6 +32,6 @@ def register_stations(request):
         stations = ref_data['stations']['items']
         api_calls.save_station_data(stations)
         return_text = 'Success, Data loaded'
-    except DatabaseError:
-        return_text = 'Failed to load data'
+    except Exception as message:
+        return_text = f'Failed to load data: {message}'
     return render(request, 'current.html', {'text': return_text})
