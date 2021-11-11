@@ -72,9 +72,9 @@ def get_local_prices(postcode, fueltype):
         }
 
     response = requests.request("POST", url, data=payload_text, headers=headers)
+    station_data = response.json()
     if not response.ok:
         raise Exception(station_data)
-    station_data = response.json()
     return station_data
 
 
@@ -156,7 +156,7 @@ def save_station_data(station_data):
 
 
 def pull_prices(full=False):
-    price_data = get_all_prices(full=False)#get_local_prices('2232', 'E10')
+    price_data = get_local_prices('2232', 'E10')
     save_prices(price_data['prices'])
 
 
