@@ -11,10 +11,11 @@ import plotly.graph_objs as go
 def index(request):
     api_calls.pull_prices()
     station_data = api_calls.get_local_prices('2210', 'E10')
-    current_lowest_price = station_data['prices'][0]['price']
-    station_code = station_data['prices'][0]['stationcode']
     station_dict = {x['code']: x for x in station_data['stations']}
-    return render(request, 'current.html', {'text': f"The lowest price for E10 is {current_lowest_price} at {station_dict[station_code]['name']}"})
+    prices = [{'price': x['price'], 'stationname':station_dict[x['stationcode']]
+               ['name'], 'fueltype':x['fueltype']} for x in station_data['prices']]
+    print(prices)
+    return render(request, 'current.html', {'Header': 'Current Prices:', 'petrol_prices': prices})
 
 
 def get_all_data(request):
