@@ -24,9 +24,10 @@ def get_access_token():
     headers = {
         'content-type': "application/json",
         'authorization': secret
-        }
+    }
 
-    auth_response = requests.request("GET", url, headers=headers, params=querystring)
+    auth_response = requests.request(
+        "GET", url, headers=headers, params=querystring)
     access_token = auth_response.json()['access_token']
     return access_token
 
@@ -69,9 +70,10 @@ def get_local_prices(postcode, fueltype):
         'apikey': os.environ['api_key'],
         'transactionid': str(transaction_id),
         'requesttimestamp': timestamp
-        }
+    }
 
-    response = requests.request("POST", url, data=payload_text, headers=headers)
+    response = requests.request(
+        "POST", url, data=payload_text, headers=headers)
     station_data = response.json()
     if not response.ok:
         raise Exception(station_data)
@@ -103,7 +105,7 @@ def get_all_prices(full=False):
         'transactionid': str(transaction_id),
         'requesttimestamp': timestamp,
         'states': 'NSW'
-        }
+    }
 
     response = requests.request("GET", url, headers=headers)
     station_data = response.json()
@@ -151,7 +153,8 @@ def pull_ref_data():
 
 def save_station_data(station_data):
     for s in station_data:
-        station = Station(name=s['name'], brand=s['brand'], id=s['code'], address=s['address'], latitude=s['location']['latitude'], longitude=s['location']['longitude'], state=s['state'])
+        station = Station(name=s['name'], brand=s['brand'], id=s['code'], address=s['address'],
+                          latitude=s['location']['latitude'], longitude=s['location']['longitude'], state=s['state'])
         station.save()
 
 
@@ -164,7 +167,11 @@ def save_prices(price_data):
     for p in price_data:
         # TODO add a check for if it's actually new data
         # station = Station.objects.get(id=p['stationcode'])
-        if p['stationcode'] == 1338:
-            updated = datetime.datetime.strptime(p['lastupdated'], "%d/%m/%Y %H:%M:%S")
-            price = Fuel_Price(station_id=p['stationcode'], fuel=p['fueltype'], time=updated, price=p['price'])
+        updated = datetime.datetime.strptime(
+            p['lastupdated'], "%d/%m/%Y %H:%M:%S")
+        possible_duplicates = Fuel_Price.objects.filter(
+            station_id=p['stationcode'], fuel=p['fueltype'], time=updated)
+        if len(possible_duplicates) == 0:
+            price = Fuel_Price(
+                station_id=p['stationcode'], fuel=p['fueltype'], time=updated, price=p['price'])
             price.save()

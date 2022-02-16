@@ -19,7 +19,7 @@ def index(request):
 
 def get_all_data(request):
     api_calls.pull_prices()
-    station_code = '1338'
+    station_code = '18163'
     fuel_code = 'E10'
     petrol_prices = Fuel_Price.objects.filter(
         station=station_code, fuel=fuel_code)
