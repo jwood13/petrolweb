@@ -10,7 +10,7 @@ import plotly.graph_objs as go
 # Create your views here.
 def index(request):
     api_calls.pull_prices()
-    station_data = api_calls.get_local_prices('2232', 'E10')
+    station_data = api_calls.get_local_prices('2210', 'E10')
     current_lowest_price = station_data['prices'][0]['price']
     station_code = station_data['prices'][0]['stationcode']
     station_dict = {x['code']: x for x in station_data['stations']}
@@ -19,7 +19,7 @@ def index(request):
 
 def get_all_data(request):
     api_calls.pull_prices()
-    station_code = '1112'
+    station_code = '1338'
     fuel_code = 'E10'
     petrol_prices = Fuel_Price.objects.filter(
         station=station_code, fuel=fuel_code)

@@ -156,13 +156,15 @@ def save_station_data(station_data):
 
 
 def pull_prices(full=False):
-    price_data = get_local_prices('2232', 'E10')
+    price_data = get_local_prices('2210', 'E10')
     save_prices(price_data['prices'])
 
 
 def save_prices(price_data):
     for p in price_data:
+        # TODO add a check for if it's actually new data
         # station = Station.objects.get(id=p['stationcode'])
-        updated = datetime.datetime.strptime(p['lastupdated'], "%d/%m/%Y %H:%M:%S")
-        price = Fuel_Price(station_id=p['stationcode'], fuel=p['fueltype'], time=updated, price=p['price'])
-        price.save()
+        if p['stationcode'] == 1338:
+            updated = datetime.datetime.strptime(p['lastupdated'], "%d/%m/%Y %H:%M:%S")
+            price = Fuel_Price(station_id=p['stationcode'], fuel=p['fueltype'], time=updated, price=p['price'])
+            price.save()
