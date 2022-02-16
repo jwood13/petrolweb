@@ -13,8 +13,8 @@ def index(request):
     api_calls.pull_prices()
     station_data = api_calls.get_local_prices('2210', 'E10')
     station_dict = {x['code']: x for x in station_data['stations']}
-    prices = [{'price': x['price'], 'stationname':station_dict[x['stationcode']]
-               ['name'], 'fueltype':x['fueltype']} for x in station_data['prices']]
+    prices = [{'price': x['price'], 'station':station_dict[x['stationcode']]
+               ['name'], 'fuel':x['fueltype']} for x in station_data['prices']]
     print(prices)
     return render(request, 'current.html', {'Header': 'Current Prices:', 'petrol_prices': prices})
 
@@ -25,14 +25,9 @@ def get_all_data(request):
     fuel_code = 'E10'
     petrol_prices = Fuel_Price.objects.filter(
         station=station_code, fuel=fuel_code)
-    if len(petrol_prices) > 0:
-        petrol_price = petrol_prices[len(petrol_prices)-1].price
-        fuel_name = petrol_prices[len(petrol_prices)-1].fuel
-    else:
-        petrol_price = 0
-        fuel_name = 'N/A'
-    station_name = Station.objects.get(id=station_code).name
-    return render(request, 'current.html', {'text': f"The petrol price at {station_name} is ${petrol_price} for {fuel_name}"})
+    if not petrol_prices:
+        raise Http404(f"No E10 price data for station {station_code}")
+    return render(request, 'current.html', {'Header': 'Current Prices:', 'petrol_prices': petrol_prices})
 
 
 def register_stations(request):
