@@ -3,8 +3,8 @@ from django.shortcuts import render
 # from requests import api
 from . import api_calls
 from .models import Fuel_Price, Station
-from plotly.offline import plot
-import plotly.graph_objs as go
+# from plotly.offline import plot
+# import plotly.graph_objs as go
 
 
 # Create your views here.
