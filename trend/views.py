@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import Http404
 # from django.http import HttpResponse
 # from requests import api
 from . import api_calls
@@ -46,8 +47,13 @@ def register_stations(request):
 
 
 def station_history(request, station_id):
+    try:
+        station_name = Station.objects.get(id=station_id).name
+    except Station.DoesNotExist:
+        raise Http404(f"No station with id {station_id}")
     price_history = Fuel_Price.objects.filter(station=station_id, fuel='E10')
-    station_name = Station.objects.get(id=station_id).name
+    if not price_history:
+        raise Http404(f"No E10 price data for station {station_name}")
 
     fig = go.Figure()
     prices = [x.price for x in price_history]
@@ -57,4 +63,4 @@ def station_history(request, station_id):
                          opacity=0.8, marker_color='green')
     fig.add_trace(scatter)
     plt_div = plot(fig, output_type='div')
-    return render(request, 'graph.html', {'plot_div': plt_div, 'text': f'This is the history for station {station_name}'})
+    return render(request, 'graph.html', {'plot_div': plt_div, 'text': f'This is the history for {station_name}'})
