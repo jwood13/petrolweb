@@ -10,6 +10,10 @@ import plotly.graph_objs as go
 
 # Create your views here.
 def index(request):
+    '''
+    Default Home Page
+    Pulls in local prices for a given postcode saves them and then displays them
+    '''
     api_calls.pull_prices()
     station_data = api_calls.get_local_prices('2210', 'E10')
     station_dict = {x['code']: x for x in station_data['stations']}
@@ -21,6 +25,7 @@ def index(request):
 
 def get_all_data(request):
     api_calls.pull_prices()
+    # TODO get most recent value for each station, rather than filtering each individually
     station_code = '18163'
     fuel_code = 'E10'
     petrol_prices = Fuel_Price.objects.filter(
@@ -31,6 +36,10 @@ def get_all_data(request):
 
 
 def register_stations(request):
+    '''
+    /register_stations
+    Update the stations list from the api
+    '''
     try:
         ref_data = api_calls.pull_ref_data()
         stations = ref_data['stations']['items']
@@ -42,6 +51,10 @@ def register_stations(request):
 
 
 def station_history(request, station_id):
+    '''
+    /history/station_id
+    show historical data for a given station
+    '''
     try:
         station_name = Station.objects.get(id=station_id).name
     except Station.DoesNotExist:
@@ -50,6 +63,7 @@ def station_history(request, station_id):
     if not price_history:
         raise Http404(f"No E10 price data for station {station_name}")
 
+    # Make a Plot
     fig = go.Figure()
     prices = [x.price for x in price_history]
     dates = [x.time for x in price_history]
@@ -58,4 +72,5 @@ def station_history(request, station_id):
                          opacity=0.8, marker_color='green')
     fig.add_trace(scatter)
     plt_div = plot(fig, output_type='div')
+
     return render(request, 'graph.html', {'plot_div': plt_div, 'text': f'This is the history for {station_name}'})
