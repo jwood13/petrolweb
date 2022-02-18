@@ -14,7 +14,7 @@ def index(request):
     station_data = api_calls.get_local_prices('2210', 'E10')
     station_dict = {x['code']: x for x in station_data['stations']}
     prices = [{'price': x['price'], 'station':station_dict[x['stationcode']]
-               ['name'], 'fuel':x['fueltype']} for x in station_data['prices']]
+               ['name'], 'fuel':x['fueltype'], 'station_code': x['stationcode']} for x in station_data['prices']]
     print(prices)
     return render(request, 'current.html', {'Header': 'Current Prices:', 'petrol_prices': prices})
 
