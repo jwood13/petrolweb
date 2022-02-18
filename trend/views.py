@@ -59,7 +59,7 @@ def station_history(request, station_id):
         station_name = Station.objects.get(id=station_id).name
     except Station.DoesNotExist:
         raise Http404(f"No station with id {station_id}")
-    price_history = Fuel_Price.objects.filter(station=station_id, fuel='E10')
+    price_history = Fuel_Price.objects.filter(station=station_id, fuel='E10').order_by('time')
     if not price_history:
         raise Http404(f"No E10 price data for station {station_name}")
 
