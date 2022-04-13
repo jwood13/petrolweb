@@ -3,14 +3,10 @@
 {% block content %}
 {{ text }}
 {% autoescape off %}
-<p>Bokeh:<br></p>
 {{ plot_script }}
 
 {{ bokeh_div }}
 
-<br>
-Plotly:
-{{ plot_div }}
 {% endautoescape %}
 
 {% endblock %}

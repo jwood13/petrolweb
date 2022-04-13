@@ -4,8 +4,6 @@ from django.http import Http404
 # from requests import api
 from . import api_calls
 from .models import Fuel_Price, Station
-from plotly.offline import plot
-import plotly.graph_objs as go
 import bokeh
 from bokeh import plotting
 
@@ -67,18 +65,11 @@ def station_history(request, station_id):
         raise Http404(f"No E10 price data for station {station_name}")
 
     # Make a Plot
-    fig = go.Figure()
     prices = [x.price/100 for x in price_history]
     dates = [x.time for x in price_history]
     data = {'date': dates, 'price': prices}
 
-    scatter = go.Scatter(x=dates, y=prices,
-                         name='test',
-                         opacity=0.8, marker_color='green')
-    fig.add_trace(scatter)
-    plt_div = plot(fig, output_type='div')
-
-    p = plotting.figure(plot_width=480, plot_height=300,
+    p = plotting.figure(plot_width=640, plot_height=400,
                         x_axis_type='datetime', title=f'Price history for {station_name}', toolbar_location=None)
     p.line('date', 'price', source=data,)
     p.scatter('date', 'price', source=data, hover_line_color='green')
@@ -89,4 +80,4 @@ def station_history(request, station_id):
     p.add_tools(bokeh.models.HoverTool(tooltips=[("Price", '@price{$0.00}')]))
     bscript, bdiv = bokeh.embed.components(p)
 
-    return render(request, 'graph.html', {'plot_div': plt_div, 'plot_script': bscript, 'bokeh_div': bdiv, 'text': f'This is the history for {station_name}'})
+    return render(request, 'graph.html', {'plot_script': bscript, 'bokeh_div': bdiv, 'text': f'This is the history for {station_name}'})
