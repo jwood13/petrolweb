@@ -6,6 +6,8 @@ from . import api_calls
 from .models import Fuel_Price, Station
 from plotly.offline import plot
 import plotly.graph_objs as go
+import bokeh
+from bokeh import plotting
 
 
 # Create your views here.
@@ -59,13 +61,14 @@ def station_history(request, station_id):
         station_name = Station.objects.get(id=station_id).name
     except Station.DoesNotExist:
         raise Http404(f"No station with id {station_id}")
-    price_history = Fuel_Price.objects.filter(station=station_id, fuel='E10').order_by('time')
+    price_history = Fuel_Price.objects.filter(
+        station=station_id, fuel='E10').order_by('time')
     if not price_history:
         raise Http404(f"No E10 price data for station {station_name}")
 
     # Make a Plot
     fig = go.Figure()
-    prices = [x.price for x in price_history]
+    prices = [x.price/100 for x in price_history]
     dates = [x.time for x in price_history]
     scatter = go.Scatter(x=dates, y=prices,
                          name='test',
@@ -73,4 +76,16 @@ def station_history(request, station_id):
     fig.add_trace(scatter)
     plt_div = plot(fig, output_type='div')
 
-    return render(request, 'graph.html', {'plot_div': plt_div, 'text': f'This is the history for {station_name}'})
+    p = plotting.figure(plot_width=480, plot_height=300,
+                        x_axis_type='datetime', title=f'Price history for {station_name}')
+
+    p.line(dates, prices)
+    p.scatter(dates, prices)
+
+    p.xaxis.axis_label = 'Date'
+    p.yaxis.axis_label = 'Price'
+    p.yaxis.formatter = bokeh.models.NumeralTickFormatter(format='$0.00')
+
+    bscript, bdiv = bokeh.embed.components(p)
+
+    return render(request, 'graph.html', {'plot_div': plt_div, 'plot_script': bscript, 'bokeh_div': bdiv, 'text': f'This is the history for {station_name}'})
