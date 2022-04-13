@@ -70,6 +70,8 @@ def station_history(request, station_id):
     fig = go.Figure()
     prices = [x.price/100 for x in price_history]
     dates = [x.time for x in price_history]
+    data = {'date': dates, 'price': prices}
+
     scatter = go.Scatter(x=dates, y=prices,
                          name='test',
                          opacity=0.8, marker_color='green')
@@ -77,15 +79,14 @@ def station_history(request, station_id):
     plt_div = plot(fig, output_type='div')
 
     p = plotting.figure(plot_width=480, plot_height=300,
-                        x_axis_type='datetime', title=f'Price history for {station_name}')
-
-    p.line(dates, prices)
-    p.scatter(dates, prices)
+                        x_axis_type='datetime', title=f'Price history for {station_name}', toolbar_location=None)
+    p.line('date', 'price', source=data,)
+    p.scatter('date', 'price', source=data, hover_line_color='green')
 
     p.xaxis.axis_label = 'Date'
     p.yaxis.axis_label = 'Price'
     p.yaxis.formatter = bokeh.models.NumeralTickFormatter(format='$0.00')
-
+    p.add_tools(bokeh.models.HoverTool(tooltips=[("Price", '@price{$0.00}')]))
     bscript, bdiv = bokeh.embed.components(p)
 
     return render(request, 'graph.html', {'plot_div': plt_div, 'plot_script': bscript, 'bokeh_div': bdiv, 'text': f'This is the history for {station_name}'})
