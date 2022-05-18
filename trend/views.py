@@ -7,8 +7,9 @@ from . import api_calls
 from .models import Fuel_Price, Station
 import bokeh
 from bokeh import plotting
-from bokeh.models import GMapOptions
+from bokeh.models import GMapOptions, LinearColorMapper, ColorBar, NumeralTickFormatter
 from bokeh.plotting import gmap
+from bokeh.transform import transform
 
 
 # Create your views here.
@@ -20,8 +21,8 @@ def index(request):
     api_calls.pull_prices()
     station_data = api_calls.get_local_prices('2210', 'E10')
     station_dict = {x['code']: x for x in station_data['stations']}
-    prices = [{'price': x['price'], 'station':station_dict[x['stationcode']]
-               , 'fuel':x['fueltype'], 'station_code': x['stationcode']} for x in station_data['prices']]
+    prices = [{'price': x['price'], 'station':station_dict[x['stationcode']],
+               'fuel':x['fueltype'], 'station_code': x['stationcode']} for x in station_data['prices']]
     print(prices)
 
     latitudes = [x['station']['location']['latitude'] for x in prices]
@@ -29,18 +30,26 @@ def index(request):
     centre_latitude = sum(latitudes)/len(latitudes)
     centre_longitude = sum(longitudes)/len(longitudes)
     names = [x['station']['name'] for x in prices]
-    station_price = [x['price'] for x in prices]
+    station_price = [x['price']/100 for x in prices]
     station_codes = [x['station_code'] for x in prices]
     data = dict(lat=latitudes,
                 lon=longitudes, name=names, price=station_price, code=station_codes)
     map_options = GMapOptions(lat=centre_latitude, lng=centre_longitude, map_type="roadmap", zoom=13)
-
     # Replace the value below with your personal API key:
     api_key = os.environ["google_maps_api_key"]
 
     p = gmap(api_key, map_options, plot_width=640, plot_height=400, toolbar_location=None)
+
+    color_mapper = LinearColorMapper(palette="Plasma256", low=min(station_price), high=max(station_price))
+    color_bar = ColorBar(color_mapper=color_mapper, title='Price', formatter=NumeralTickFormatter(format="$0.00"))
+    p.add_layout(color_bar, 'right')
+
     p.add_tools(bokeh.models.HoverTool(tooltips=[("Name", '@name'), ("Price", '@price{$0.00}')]))
-    p.circle(x="lon", y="lat", size=15, fill_color="blue", fill_alpha=0.8, source=data)
+    p.circle(x="lon", y="lat", size=15, fill_color=transform('price', color_mapper), fill_alpha=0.8, line_width=0.0, source=data)
+
+    p.xaxis.visible = False
+    p.yaxis.visible = False
+
     bscript, bdiv = bokeh.embed.components(p)
     return render(request, 'current.html', {'Header': 'Current Prices:', 'petrol_prices': prices,
                                             'plot_script': bscript, 'bokeh_div': bdiv})
