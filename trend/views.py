@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render
 from django.http import Http404
 # from django.http import HttpResponse
@@ -6,6 +7,8 @@ from . import api_calls
 from .models import Fuel_Price, Station
 import bokeh
 from bokeh import plotting
+from bokeh.models import GMapOptions
+from bokeh.plotting import gmap
 
 
 # Create your views here.
@@ -18,9 +21,29 @@ def index(request):
     station_data = api_calls.get_local_prices('2210', 'E10')
     station_dict = {x['code']: x for x in station_data['stations']}
     prices = [{'price': x['price'], 'station':station_dict[x['stationcode']]
-               ['name'], 'fuel':x['fueltype'], 'station_code': x['stationcode']} for x in station_data['prices']]
+               , 'fuel':x['fueltype'], 'station_code': x['stationcode']} for x in station_data['prices']]
     print(prices)
-    return render(request, 'current.html', {'Header': 'Current Prices:', 'petrol_prices': prices})
+
+    latitudes = [x['station']['location']['latitude'] for x in prices]
+    longitudes = [x['station']['location']['longitude'] for x in prices]
+    centre_latitude = sum(latitudes)/len(latitudes)
+    centre_longitude = sum(longitudes)/len(longitudes)
+    names = [x['station']['name'] for x in prices]
+    station_price = [x['price'] for x in prices]
+    station_codes = [x['station_code'] for x in prices]
+    data = dict(lat=latitudes,
+                lon=longitudes, name=names, price=station_price, code=station_codes)
+    map_options = GMapOptions(lat=centre_latitude, lng=centre_longitude, map_type="roadmap", zoom=13)
+
+    # Replace the value below with your personal API key:
+    api_key = os.environ["google_maps_api_key"]
+
+    p = gmap(api_key, map_options, plot_width=640, plot_height=400, toolbar_location=None)
+    p.add_tools(bokeh.models.HoverTool(tooltips=[("Name", '@name'), ("Price", '@price{$0.00}')]))
+    p.circle(x="lon", y="lat", size=15, fill_color="blue", fill_alpha=0.8, source=data)
+    bscript, bdiv = bokeh.embed.components(p)
+    return render(request, 'current.html', {'Header': 'Current Prices:', 'petrol_prices': prices,
+                                            'plot_script': bscript, 'bokeh_div': bdiv})
 
 
 def get_all_data(request):

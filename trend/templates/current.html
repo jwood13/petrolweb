@@ -5,7 +5,13 @@
 <br>
 <ul>
 {% for price in petrol_prices %}
-    <li><a href="{{ price.station_code }}">{{ price.station }}</a> - {{price.fuel}}: {{price.price}}</li>
+    <li><a href="{{ price.station_code }}">{{ price.station.name }}</a> - {{price.fuel}}: {{price.price}}</li>
 {% endfor %}
 </ul>
+{% autoescape off %}
+{{ plot_script }}
+
+{{ bokeh_div }}
+
+{% endautoescape %}
 {% endblock %}
