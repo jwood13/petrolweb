@@ -109,7 +109,7 @@ def station_history(request, station_id):
     p.xaxis.axis_label = 'Date'
     p.yaxis.axis_label = 'Price'
     p.yaxis.formatter = bokeh.models.NumeralTickFormatter(format='$0.00')
-    p.add_tools(bokeh.models.HoverTool(tooltips=[("Price", '@price{$0.00}')]))
+    p.add_tools(bokeh.models.HoverTool(tooltips=[("Price", '@price{$0.00}'), ("Date", '@date{%d/%m}')], formatters={'@date': 'datetime'}))
     bscript, bdiv = bokeh.embed.components(p)
 
     return render(request, 'graph.html', {'plot_script': bscript, 'bokeh_div': bdiv, 'text': f'This is the history for {station_name}'})
